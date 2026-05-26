@@ -115,7 +115,15 @@ set -euo pipefail
 
 CONF="$HOME/.config/rclone-plasmoid/automount.conf"
 RC_ADDR="localhost:5572"
+
+# Čti mountBase z konfig souboru widgetu; fallback na výchozí
+WIDGET_CONF="$HOME/.config/rclone-plasmoid/config"
 MOUNT_BASE="$HOME/mnt/rclone"
+if [ -f "$WIDGET_CONF" ]; then
+    _val="$(grep '^mountBase=' "$WIDGET_CONF" 2>/dev/null | cut -d= -f2- | tr -d '\n')"
+    [ -n "$_val" ] && MOUNT_BASE="$_val"
+fi
+echo "[rclone-automount] Mount base: $MOUNT_BASE"
 
 # Počkej max 60s na RC daemon
 echo "[rclone-automount] Čekám na RC daemon na $RC_ADDR..."

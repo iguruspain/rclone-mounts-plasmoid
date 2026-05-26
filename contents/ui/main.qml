@@ -181,6 +181,7 @@ PlasmoidItem {
             if (code === 0) homeDir = out
             fetchRemotes()
             loadAutoMounts()
+            saveMountConfig()
             return
         }
         if (cmd.indexOf("automount.conf") !== -1 && cmd.indexOf("echo") === -1) {
@@ -355,6 +356,14 @@ PlasmoidItem {
         if (homeDir === "") return
         exe.run("cat '" + homeDir + "/.config/rclone-plasmoid/automount.conf' 2>/dev/null || true")
     }
+
+    // Zapíše aktuální mountBase do sdíleného konfig souboru pro automount skript
+    function saveMountConfig() {
+        if (homeDir === "" || mountBase === "") return
+        var confDir = homeDir + "/.config/rclone-plasmoid"
+        exe.run("mkdir -p '" + confDir + "' && printf 'mountBase=%s\\n' '" + mountBase + "' > '" + confDir + "/config'")
+    }
+    onMountBaseChanged: saveMountConfig()
 
     function toggleAutoMount(remote) {
         if (homeDir === "") return
