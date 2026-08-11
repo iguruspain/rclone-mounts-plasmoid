@@ -1,4 +1,4 @@
-// MainPage.qml – hlavní obsah widgetu s tab barem Mounts / Historie
+// MainPage.qml – main widget content with tab bar Mounts / History
 
 import QtQuick
 import QtQuick.Layouts
@@ -30,7 +30,7 @@ ColumnLayout {
         }
     }
 
-    // ── Obsah záložek ────────────────────────────────────────────────────────
+    // ── Tab content ────────────────────────────────────────────────────────
     StackLayout {
         id: tabContent
         Layout.fillWidth: true
@@ -43,7 +43,7 @@ ColumnLayout {
         ColumnLayout {
             spacing: 0
 
-            // Hledání + refresh
+            // ── Search + refresh
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 0
@@ -64,25 +64,8 @@ ColumnLayout {
                 }
             }
 
-            // Banner: daemon neběží
-            Kirigami.InlineMessage {
-                Layout.fillWidth: true
-                Layout.margins: Kirigami.Units.smallSpacing
-                visible: !rcRunning
-                type: Kirigami.MessageType.Error
-                text: errorMsg !== "" ? errorMsg : "RC daemon is not running — click ▶ to start"
-            }
-
-            // Banner: chyba mount/unmount
-            Kirigami.InlineMessage {
-                Layout.fillWidth: true
-                Layout.margins: Kirigami.Units.smallSpacing
-                visible: rcRunning && errorMsg !== ""
-                type: Kirigami.MessageType.Error
-                text: errorMsg
-            }
-
-            // Seznam remotes
+            
+            // Remotes list
             PlasmaComponents.ScrollView {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
@@ -142,7 +125,7 @@ ColumnLayout {
                                 }
                             }
 
-                            // Auto-mount pin – připojit automaticky při startu sítě
+                            // Auto-mount pin – attach automatically on network startup
                             PlasmaComponents.ToolButton {
                                 property bool pinned: autoMountList.indexOf(del.remote) >= 0
                                 icon.name: pinned ? "network-connect" : "network-disconnect"
@@ -152,12 +135,12 @@ ColumnLayout {
                                 onClicked: toggleAutoMount(del.remote)
                                 PlasmaComponents.ToolTip {
                                     text: autoMountList.indexOf(del.remote) >= 0
-                                          ? "Auto-mount zapnut – klikni pro vypnutí"
-                                          : "Zapnout auto-mount při připojení sítě"
+                                          ? "Auto-mount enabled – click to disable"
+                                          : "Enable auto-mount on network connection"
                                 }
                             }
 
-                            // Otevřít složku – vždy viditelné, disabled když není připojeno
+                            // Open folder – always visible, disabled when not mounted
                             PlasmaComponents.ToolButton {
                                 icon.name: "document-open-folder"
                                 enabled: del.mounted
@@ -227,18 +210,18 @@ ColumnLayout {
         }
 
         // ════════════════════════════════
-        //  TAB 1 – Historie přenosů
+        //  TAB 1 – Transfer History
         // ════════════════════════════════
         ColumnLayout {
             spacing: 0
 
-            // ── Aktivní přenosy ──────────────────────────────────────────────
+            // ── Active transfers ──────────────────────────────────────────────
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 0
                 visible: activeTransfers.length > 0
 
-                // Nadpis sekce
+                // Section header
                 RowLayout {
                     Layout.fillWidth: true
                     Layout.leftMargin: Kirigami.Units.smallSpacing
@@ -255,7 +238,7 @@ ColumnLayout {
                     }
                 }
 
-                // Řádky aktivních přenosů
+                // Active transfer lines
                 Repeater {
                     model: activeTransfers
                     delegate: ColumnLayout {
@@ -270,18 +253,18 @@ ColumnLayout {
                             var s = n.lastIndexOf("/")
                             return s >= 0 ? n.substring(s + 1) : n
                         }
-                        // pct je předpočítáno a clampováno v main.qml (_activePctCache)
+                        // pct is pre-computed and clamped in main.qml (_activePctCache)
                         property real pct: t._pct || 0
-                        // animace jen pokud opravdu nic nevíme (začátek přenosu)
+                        // animation only when we truly know nothing (start of transfer)
                         property bool indeterminate: pct === 0
                         property string speed: formatSpeed(t.speed || 0)
-                        // Směr: upload = lokální zdroj → remote; download = remote → lokální cíl
+                        // Direction: upload = local source → remote; download = remote → local destination
                         property bool isUpload: {
                             var src = t.srcFs || t.src_fs || ""
                             var dst = t.dstFs || t.dst_fs || ""
                             if (src !== "" && src.charAt(0) === "/") return true
                             if (dst !== "" && dst.charAt(0) === "/") return false
-                            return true  // výchozí: upload (zápis přes mount)
+                            return true  // default: upload (write via mount)
                         }
 
                         RowLayout {
@@ -312,7 +295,7 @@ ColumnLayout {
                             }
                         }
 
-                        // Progress bar – determinate nebo animovaný indeterminate
+                        // Progress bar – determinate or animated indeterminate
                         Rectangle {
                             Layout.fillWidth: true
                             height: 3
@@ -330,7 +313,7 @@ ColumnLayout {
                                 Behavior on width { NumberAnimation { duration: 300 } }
                             }
 
-                            // Indeterminate pulse (upload přes mount – neznámá velikost)
+                            // Indeterminate pulse (upload via mount – unknown size)
                             Rectangle {
                                 id: indBar
                                 visible: indeterminate
@@ -348,7 +331,7 @@ ColumnLayout {
                             }
                         }
 
-                        // Oddělení od dalšího záznamu
+                        // Separator from next record
                         Item { Layout.fillWidth: true; height: 4 }
                     }
                 }
@@ -361,7 +344,7 @@ ColumnLayout {
                 }
             }
 
-            // ── Záhlaví dokončených přenosů ──────────────────────────────────
+            // ── Completed transfers header ──────────────────────────────────
             RowLayout {
                 Layout.fillWidth: true
                 Layout.leftMargin: Kirigami.Units.smallSpacing
@@ -406,7 +389,7 @@ ColumnLayout {
                 color: "#18808080"
             }
 
-            // ── Seznam dokončených přenosů ───────────────────────────────────
+            // ── Completed transfers list ────────────────────────────────────
             PlasmaComponents.ScrollView {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
@@ -441,13 +424,13 @@ ColumnLayout {
                             return slash > 0 ? n.substring(0, slash) : ""
                         }
                         property string doneAt: bestTime(entry)
-                        // Jen čitelná část chyby (bez JSON bloků)
+                        // Only readable part of error (without JSON blocks)
                         property string shortError: cleanError(entry.error || "")
 
                         contentItem: RowLayout {
                             spacing: Kirigami.Units.largeSpacing
 
-                            // Stavová ikona
+                            // Status icon
                             Kirigami.Icon {
                                 source: hDel.hasError ? "dialog-error-symbolic"
                                                       : "checkmark-symbolic"
@@ -458,7 +441,7 @@ ColumnLayout {
                                 Layout.alignment: Qt.AlignVCenter
                             }
 
-                            // Název + meta
+                            // Name + metadata
                             ColumnLayout {
                                 Layout.fillWidth: true
                                 spacing: 1

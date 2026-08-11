@@ -41,7 +41,7 @@ PlasmoidItem {
         }
     ]
 
-    // ── Konfigurace ──────────────────────────────────────────────────────────
+    // ── Configuration ──────────────────────────────────────────────────────────
     property string mountBase: {
         var base = plasmoid.configuration.mountBase !== ""
                    ? plasmoid.configuration.mountBase
@@ -58,7 +58,7 @@ PlasmoidItem {
                                   ? plasmoid.configuration.pollInterval : 10
     property bool   autoStartRcd: plasmoid.configuration.autoStartRcd
 
-    // ── Stav ─────────────────────────────────────────────────────────────────
+    // ── State ──────────────────────────────────────────────────────────────────
     property string homeDir:         ""
     property var    remotes:         []
     property var    activeMounts:    ({})
@@ -67,12 +67,12 @@ PlasmoidItem {
     property string errorMsg:        ""
     property string filterText:      ""
     property var    remoteTypes:     ({})
-    property var    transferHistory: []   // dokončené přenosy
-    property var    activeTransfers: []   // právě probíhající
-    property var    _activePctCache: ({}) // clamped pct per filename – nikdy neklesá
-    property var    autoMountList:   []   // remoty s auto-mount při startu sítě
+    property var    transferHistory: []   // completed transfers
+    property var    activeTransfers: []   // currently in progress
+    property var    _activePctCache: ({}) // clamped pct per filename – never decreases
+    property var    autoMountList:   []   // remotes with auto-mount on network startup
 
-    // ── Pomocné funkce ───────────────────────────────────────────────────────
+    // ── Helper functions ───────────────────────────────────────────────────────
     function formatSize(bytes) {
         if (!bytes || bytes < 0) return "?"
         if (bytes < 1024) return bytes + " B"
@@ -81,7 +81,7 @@ PlasmoidItem {
         return (bytes / 1073741824).toFixed(2) + " GB"
     }
 
-    // Relativní čas ve stylu "před 2 min"
+    // Relative time in style "2 min ago"
     function formatRelTime(isoStr) {
         if (!isoStr) return ""
         try {
@@ -96,7 +96,7 @@ PlasmoidItem {
         } catch(e) { return "" }
     }
 
-    // Čas dokončení ve formátu HH:MM (ignoruje zero date z Go)
+    // Completion time in HH:MM format (ignores Go zero date)
     function formatTime(isoStr) {
         if (!isoStr) return ""
         try {
@@ -107,7 +107,7 @@ PlasmoidItem {
         } catch(e) { return "" }
     }
 
-    // Relativní čas – ignoruje zero date
+    // Relative time – ignores zero date
     function safeRelTime(isoStr) {
         if (!isoStr) return ""
         try {
@@ -117,8 +117,8 @@ PlasmoidItem {
         } catch(e) { return "" }
     }
 
-    // Vytáhne nejlepší dostupný timestamp z objektu přenosu
-    // rclone používá snake_case: completed_at, started_at
+    // Extracts the best available timestamp from a transfer object
+    // rclone uses snake_case: completed_at, started_at
     function bestTime(entry) {
         var candidates = [entry.completed_at, entry.completedAt,
                           entry.started_at,   entry.startedAt,
@@ -130,7 +130,7 @@ PlasmoidItem {
         return ""
     }
 
-    // Rychlost přenosu (2 desetinná místa)
+    // Transfer speed (2 decimal places)
     function formatSpeed(bps) {
         if (!bps || bps <= 0) return ""
         if (bps < 1024)       return bps.toFixed(2) + " B/s"
@@ -163,7 +163,7 @@ PlasmoidItem {
         }
     }
 
-    // ── Příkazy ──────────────────────────────────────────────────────────────
+    // ── Commands ──────────────────────────────────────────────────────────────
     P5Support.DataSource {
         id: exe
         engine: "executable"
@@ -207,6 +207,7 @@ PlasmoidItem {
             } else {
                 remotes = []
                 remoteTypes = {}
+                errorMsg = cleanError(err)
             }
             return
         }
@@ -232,29 +233,36 @@ PlasmoidItem {
             return
         }
         if (cmd.indexOf("mount/mount") !== -1 || cmd.indexOf("mount/unmount") !== -1) {
-            errorMsg = (code !== 0) ? "Error: " + err : ""
-            Qt.callLater(checkDaemon)
+            if (code === 0) {
+                // success – clear any previous error and then verify daemon state
+                errorMsg = ""
+                Qt.callLater(checkDaemon)
+            } else {
+                // failure – rclone rc sends errors to stdout as JSON, so check both
+                var rawErr = err !== "" ? err : out
+                errorMsg = cleanError(rawErr)
+            }
             return
         }
         if (cmd.indexOf("core/stats") !== -1 && cmd.indexOf("core/transferred") === -1) {
             if (code === 0) {
                 try {
                     var sp = JSON.parse(out)
-                    // Zobrazuj všechny probíhající přenosy (i bytes=0 na začátku uploadu)
-                    // vyřaď jen 100% dokončené (než je přesune core/transferred)
+                    // Show all active transfers (including bytes=0 at upload start)
+                    // exclude only 100% completed (before they move to core/transferred)
                     var raw = sp.transferring
                         ? sp.transferring.filter(function(t) {
                             return (t.percentage || 0) < 100
                           })
                         : []
-                    // Vyčisti cache pro soubory, které už neprobíhají
+                    // Clear cache for files that are no longer in progress
                     var activeNames = {}
                     raw.forEach(function(t) { if (t.name) activeNames[t.name] = true })
                     var newCache = {}
                     Object.keys(_activePctCache).forEach(function(k) {
                         if (activeNames[k]) newCache[k] = _activePctCache[k]
                     })
-                    // Agreguj: file.txt + file.txt.part → jeden záznam pod "file.txt"
+                    // Aggregate: file.txt + file.txt.part → one record under "file.txt"
                     var byDisplayName = {}
                     raw.forEach(function(t) {
                         var rawName = t.name || ""
@@ -263,7 +271,7 @@ PlasmoidItem {
                         var sz = t.size || 0
                         var by = t.bytes || 0
                         if (!p && sz > 0 && by > 0) p = Math.min(99, by / sz * 100)
-                        // Clamp: pct nikdy neklesá
+                        // Clamp: pct never decreases
                         var cacheKey = displayName
                         var prev = newCache[cacheKey] || 0
                         p = Math.max(prev, p)
@@ -275,10 +283,10 @@ PlasmoidItem {
                             clone._pct = p
                             byDisplayName[displayName] = clone
                         } else {
-                            // Sloučit: vezmi větší bytes, větší pct, preferuj non-.part záznam
+                            // Merge: take larger bytes, larger pct, prefer non-.part record
                             if ((t.bytes || 0) > (existing.bytes || 0)) existing.bytes = t.bytes
                             if (p > existing._pct) existing._pct = p
-                            // Pokud existující byl .part a nový není → preferuj non-.part metadata
+                            // If existing was .part and new one isn't → prefer non-.part metadata
                             if (rawName === displayName) {
                                 existing.size    = t.size
                                 existing.speed   = t.speed
@@ -301,12 +309,12 @@ PlasmoidItem {
                 try {
                     var tp = JSON.parse(out)
                     if (tp.transferred && tp.transferred.length > 0) {
-                        // Deduplikuj: jeden záznam na soubor, akumuluj bajty z chunků
+                        // Deduplicate: one record per file, accumulate bytes from chunks
                         var byName = {}
                         tp.transferred.forEach(function(t) {
-                            if (t.checked && !(t.error && t.error !== "")) return  // přeskoč verifikace bez chyby
+                            if (t.checked && !(t.error && t.error !== "")) return  // skip verification without error
                             var name = t.name || ""
-                            // Přeskoč temp soubory (qt_temp.*, .tmp, ~*, atd.) pokud nemají chybu
+                            // Skip temp files (qt_temp.*, .tmp, ~*, etc.) if no error
                             var baseName = name.substring(name.lastIndexOf("/") + 1)
                             var isTmp = /^qt_temp\.|^\..*[a-zA-Z0-9]{5,}$|^\.~lock\.|^~|\.part$/.test(baseName)
                             if (isTmp && !(t.error && t.error !== "")) return
@@ -314,7 +322,7 @@ PlasmoidItem {
                             if (!prev) {
                                 byName[name] = Object.assign({}, t)
                             } else {
-                                // Sloučit chunky: akumuluj bytes, propaguj error, ponech nejnovější timestamp
+                                // Merge chunks: accumulate bytes, propagate error, keep newest timestamp
                                 var merged = Object.assign({}, prev)
                                 merged.bytes = (prev.bytes || 0) + (t.bytes || 0)
                                 merged.size  = t.size || prev.size
@@ -328,7 +336,7 @@ PlasmoidItem {
                                 byName[name] = merged
                             }
                         })
-                        // Seřaď sestupně (nejnovější první)
+                        // Sort descending (newest first)
                         var deduped = Object.keys(byName).map(function(k){ return byName[k] })
                         deduped.sort(function(a, b) {
                             var ta = new Date(a.completed_at || a.started_at || "")
@@ -357,7 +365,7 @@ PlasmoidItem {
         exe.run("cat '" + homeDir + "/.config/rclone-plasmoid/automount.conf' 2>/dev/null || true")
     }
 
-    // Zapíše aktuální mountBase do sdíleného konfig souboru pro automount skript
+    // Writes current mountBase to shared config file for automount script
     function saveMountConfig() {
         if (homeDir === "" || mountBase === "") return
         var confDir = homeDir + "/.config/rclone-plasmoid"
@@ -384,17 +392,24 @@ PlasmoidItem {
     function startDaemon()    { errorMsg = "Starting..."; exe.run("rclone rcd --rc-addr=" + rcAddr + " --rc-no-auth &") }
     function openFolder(path) { exe.run("xdg-open '" + path + "'") }
 
-    // Vytáhne čitelnou část chyby – odstraní JSON blok "Details: [...]" od rclone/Google API
+    // Extracts readable part of error – removes JSON block "Details: [...]" from rclone/Google API
     function cleanError(errStr) {
         if (!errStr) return ""
         var clean = errStr
-        // Odstraň "Details:" blok (s nebo bez předchozího \n)
+        // Try to extract message from rclone rc JSON error: {"error":"..."} or {"core":{"error":"..."}}
+        try {
+            var j = JSON.parse(clean)
+            if (j.error) return j.error
+            if (j.core && j.core.error) return j.core.error
+            if (j.message) return j.message
+        } catch(e) {}
+        // Remove "Details:" block (with or without preceding \n)
         var di = clean.indexOf("Details:")
         if (di > 0) clean = clean.substring(0, di).trim()
-        // Odstraň JSON bloky (vše od první "{")
+        // Remove JSON blocks (everything from first "{")
         var ji = clean.indexOf("{")
         if (ji > 0) clean = clean.substring(0, ji).trim()
-        // Vezmi jen první neprázdný řádek
+        // Take only the first non-empty line
         var lines = clean.split("\n")
         for (var i = 0; i < lines.length; i++) {
             var l = lines[i].trim()
@@ -405,7 +420,7 @@ PlasmoidItem {
         return clean.trim()
     }
 
-    // Zkusí znovu nahrát soubory selháním přes VFS refresh na všech aktivních mountech
+    // Tries to re-upload failed files by triggering VFS refresh on all active mounts
     function retryFailed() {
         var mounts = Object.keys(activeMounts)
         mounts.forEach(function(fs) {
@@ -419,25 +434,24 @@ PlasmoidItem {
         var cacheBase = (homeDir !== "" ? homeDir : "$HOME") + "/.cache/rclone-mounts"
         var cacheDir = cacheBase + "/" + remote.replace(/:$/, "")
         errorMsg = ""
-        var opts = " -o vfs-cache-mode=writes -o vfs-write-back=1s"
-               + " -o attr-timeout=1s -o dir-cache-time=5s"
-               + " -o cache-dir='" + cacheDir + "'"
-        exe.run("mkdir -p '" + path + "' '" + cacheDir + "' && rclone rc mount/mount fs=" + remote
-            + " mountPoint='" + path + "'" + opts
-            + " --exclude '*.*swp' --exclude '*.trashinfo' --rc-addr=" + rcAddr + " 2>&1")
+        var json = '{"fs":"' + remote + '","mountPoint":"' + path + '",'
+            + '"mountOpt":{"vfs-cache-mode":"writes","vfs-write-back":"1s",'
+            + '"attr-timeout":"1s","dir-cache-time":"5s","cache-dir":"' + cacheDir + '"}}'
+        exe.run("mkdir -p '" + path + "' '" + cacheDir + "' && rclone rc mount/mount --json '" + json
+            + "' --rc-addr=" + rcAddr)
     }
     function doUnmount(mp) {
         errorMsg = ""
         exe.run("rclone rc mount/unmount mountPoint='" + mp + "' --rc-addr=" + rcAddr)
     }
 
-    // Pomalý timer: kontrola mountů + dokončených přenosů
+    // Slow timer: check mounts + completed transfers
     Timer {
         interval: pollInterval * 1000
         running: true; repeat: true
         onTriggered: { checkDaemon(); checkTransfers() }
     }
-    // Rychlý timer: aktivní přenosy (každé 2 s)
+    // Fast timer: active transfers (every 2s)
     Timer {
         interval: 2000
         running: rcRunning; repeat: true
@@ -453,7 +467,7 @@ PlasmoidItem {
     }
 
     // ════════════════════════════════════════════════════════════════════════
-    //  KOMPAKTNÍ ZOBRAZENÍ
+    //  COMPACT VIEW
     // ════════════════════════════════════════════════════════════════════════
     compactRepresentation: MouseArea {
         id: compactRoot
@@ -480,7 +494,7 @@ PlasmoidItem {
     }
 
     // ════════════════════════════════════════════════════════════════════════
-    //  PLNÉ ZOBRAZENÍ
+    //  FULL VIEW
     // ════════════════════════════════════════════════════════════════════════
     fullRepresentation: PlasmaExtras.Representation {
         Layout.minimumWidth:  Kirigami.Units.gridUnit * 24
@@ -489,11 +503,29 @@ PlasmoidItem {
         Layout.maximumHeight: Kirigami.Units.gridUnit * 40
         collapseMarginsHint: true
 
-        // StackView zůstává jako ve funkční verzi – tab bar je uvnitř MainPage
-        QQC2.StackView {
-            id: stack
+        ColumnLayout {
             anchors.fill: parent
-            initialItem: MainPage {}
+            spacing: 0
+
+            // Global error banner – shows any command failure or daemon down
+            Kirigami.InlineMessage {
+                id: globalErrorBanner
+                Layout.fillWidth: true
+                Layout.minimumHeight: visible ? implicitHeight : 0
+                Layout.maximumHeight: visible ? implicitHeight : 0
+                Layout.margins: Kirigami.Units.smallSpacing
+                type: Kirigami.MessageType.Error
+                visible: errorMsg !== ""
+                text: cleanError(errorMsg)
+            }
+
+            // StackView remains as in the functional version – tab bar is inside MainPage
+            QQC2.StackView {
+                id: stack
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                initialItem: MainPage {}
+            }
         }
     }
 }

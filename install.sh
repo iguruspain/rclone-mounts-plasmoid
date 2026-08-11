@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 # ============================================================
-# install.sh – Instalátor Rclone Mounts Plasmoidu (Plasma 6)
-# Spusť BEZ sudo: bash install.sh
+# install.sh – Rclone Mounts Plasmoid Installer (Plasma 6)
+# Run WITHOUT sudo: bash install.sh
 # ============================================================
 set -euo pipefail
 
-# ── Ochrana: nespouštět jako root ────────────────────────────────────────────
+# ── Protection: don't run as root ────────────────────────────────────────────
 if [ "$EUID" -eq 0 ]; then
-    echo "❌ Nespouštěj tento skript jako root / sudo!"
-    echo "   Spusť normálně: bash install.sh"
+    echo "❌ Don't run this script as root / sudo!"
+    echo "   Run normally: bash install.sh"
     echo ""
-    echo "   NM dispatcher (WiFi reconnect) se nainstaluje automaticky"
-    echo "   a vyžádá si sudo heslo jen pro ten jeden příkaz."
+    echo "   NM dispatcher (WiFi reconnect) will be installed automatically"
+    echo "   and will only ask for sudo password once for that command."
     exit 1
 fi
 
@@ -26,14 +26,14 @@ echo "  Rclone Mounts Plasmoid - Installer"
 echo "================================================="
 echo ""
 
-# Kontrola rclone
+# Check for rclone
 if ! command -v rclone &>/dev/null; then
     echo "❌ rclone not found! Install it from: https://rclone.org/install/"
     exit 1
 fi
 echo "✅ $(rclone --version | head -1)"
 
-# ── Instalace / upgrade plasmoidu ────────────────────────────────────────────
+# ── Plasmoid installation / upgrade ────────────────────────────────────────────
 echo ""
 echo "📦 Installing plasmoid..."
 if kpackagetool6 --list --type Plasma/Applet 2>/dev/null | grep -q "$PLASMOID_ID"; then
@@ -44,12 +44,12 @@ else
     echo "   ✅ Plasmoid installed"
 fi
 
-# ── Adresář pro mounty ────────────────────────────────────────────────────────
+# ── Mount directory ────────────────────────────────────────────────────────
 MOUNT_BASE="$REAL_HOME/mnt/rclone"
 mkdir -p "$MOUNT_BASE"
 echo "   📁 Mount directory: $MOUNT_BASE"
 
-# ── Systemd user service pro RC daemon ───────────────────────────────────────
+# ── Systemd user service for RC daemon ──────────────────────────────────────
 echo ""
 echo "🔧 Configuring rclone RC daemon autostart..."
 
@@ -81,7 +81,7 @@ else
     echo "   ⚠️  Daemon failed to start - check: systemctl --user status rclone-rc"
 fi
 
-# ── Auto-mount při připojení sítě ────────────────────────────────────────────
+# ── Auto-mount on network connect ────────────────────────────────────────────
 echo ""
 echo "🔧 Configuring auto-mount on network connect..."
 
@@ -92,12 +92,12 @@ AM_SCRIPT="$REAL_HOME/.local/bin/rclone-automount.sh"
 mkdir -p "$AM_CONF_DIR"
 mkdir -p "$REAL_HOME/.local/bin"
 
-# Konfigurační soubor se seznamem remotů (pokud ještě neexistuje)
+# Configuration file with list of remotes (if it doesn't exist yet)
 if [ ! -f "$AM_CONF" ]; then
     cat > "$AM_CONF" << 'CONF'
-# Rclone Auto-Mount – seznam remotů připojovaných při startu sítě
-# Jeden remote na řádek, přesně tak jak ho vrací "rclone listremotes"
-# Příklad:
+# Rclone Auto-Mount – list of remotes to mount on network startup
+# One remote per line, exactly as returned by "rclone listremotes"
+# Example:
 #   gdrive:
 #   dropbox:
 #   mysftp:
@@ -110,13 +110,13 @@ fi
 # Mount skript
 cat > "$AM_SCRIPT" << 'SCRIPT'
 #!/usr/bin/env bash
-# rclone-automount.sh – připojí remoty ze seznamu, jakmile je RC daemon dostupný
+# rclone-automount.sh – mounts remotes from the list once RC daemon is available
 set -euo pipefail
 
 CONF="$HOME/.config/rclone-plasmoid/automount.conf"
 RC_ADDR="localhost:5572"
 
-# Čti mountBase z konfig souboru widgetu; fallback na výchozí
+# Read mountBase from widget config file; fallback to default
 WIDGET_CONF="$HOME/.config/rclone-plasmoid/config"
 MOUNT_BASE="$HOME/mnt/rclone"
 if [ -f "$WIDGET_CONF" ]; then
@@ -125,19 +125,19 @@ if [ -f "$WIDGET_CONF" ]; then
 fi
 echo "[rclone-automount] Mount base: $MOUNT_BASE"
 
-# Počkej max 60s na RC daemon
-echo "[rclone-automount] Čekám na RC daemon na $RC_ADDR..."
+# Wait up to 60s for RC daemon
+echo "[rclone-automount] Waiting for RC daemon on $RC_ADDR..."
 for i in $(seq 60); do
     rclone rc mount/listmounts --rc-addr="$RC_ADDR" --rc-no-auth &>/dev/null && break
     sleep 1
 done
 
 if ! rclone rc mount/listmounts --rc-addr="$RC_ADDR" --rc-no-auth &>/dev/null; then
-    echo "[rclone-automount] ⚠️  RC daemon nedostupný po 60s, přeskakuji."
+    echo "[rclone-automount] ⚠️  RC daemon unavailable after 60s, skipping."
     exit 0
 fi
 
-[ ! -f "$CONF" ] && { echo "[rclone-automount] Žádný config ($CONF), přeskakuji."; exit 0; }
+[ ! -f "$CONF" ] && { echo "[rclone-automount] No config ($CONF), skipping."; exit 0; }
 
 while IFS= read -r remote; do
     [[ -z "$remote" || "$remote" =~ ^[[:space:]]*# ]] && continue
@@ -145,10 +145,10 @@ while IFS= read -r remote; do
     name="${remote%%:}"
     mp="$MOUNT_BASE/$name"
 
-    # Zkontroluj jestli již je namountováno
+    # Check if already mounted
     if rclone rc mount/listmounts --rc-addr="$RC_ADDR" --rc-no-auth 2>/dev/null \
         | python3 -c "import sys,json; mps=[m['MountPoint'] for m in json.load(sys.stdin).get('mountPoints',[])]; exit(0 if '$mp' in mps else 1)" 2>/dev/null; then
-        echo "[rclone-automount] ✓ Přeskakuji $remote – už namountováno"
+        echo "[rclone-automount] ✓ Skipping $remote – already mounted"
         continue
     fi
 
@@ -157,7 +157,7 @@ while IFS= read -r remote; do
         --rc-addr="$RC_ADDR" --rc-no-auth 2>/dev/null; then
         echo "[rclone-automount] ✅ $remote → $mp"
     else
-        echo "[rclone-automount] ❌ Selhalo: $remote"
+        echo "[rclone-automount] ❌ Failed: $remote"
     fi
 done < "$CONF"
 SCRIPT
@@ -186,18 +186,18 @@ systemctl --user daemon-reload
 systemctl --user enable rclone-automount.service
 echo "   ✅ Auto-mount service enabled (runs at login)"
 
-# NetworkManager dispatcher – volá jen sudo pro jeden soubor, zbytek bežel jako user
+# NetworkManager dispatcher – only calls sudo for one file, the rest runs as user
 NM_DISPATCHER_DIR="/etc/NetworkManager/dispatcher.d"
 NM_SCRIPT="$NM_DISPATCHER_DIR/99-rclone-automount"
 
 if [ -d "$NM_DISPATCHER_DIR" ]; then
     echo ""
-    echo "🌐 Nastavuji NM dispatcher (automount při WiFi reconnect)..."
-    echo "   (bude vyžadováno sudo heslo pro zápis do /etc/NetworkManager/)"
+    echo "🌐 Setting up NM dispatcher (auto-mount on WiFi reconnect)..."
+    echo "   (sudo password will be required to write to /etc/NetworkManager/)"
 
     sudo bash -c "cat > '$NM_SCRIPT'" << NMSCRIPT
 #!/usr/bin/env bash
-# Spustí rclone-automount při každém připojení sítě / VPN
+# Run rclone-automount on every network / VPN connection
 [ "\$2" = "up" ] || [ "\$2" = "vpn-up" ] || exit 0
 sleep 2
 XDG_RUNTIME_DIR=/run/user/${REAL_UID} \
@@ -207,12 +207,12 @@ su -s /bin/bash -c "${REAL_HOME}/.local/bin/rclone-automount.sh" ${REAL_USER} &
 NMSCRIPT
 
     sudo chmod +x "$NM_SCRIPT"
-    echo "   ✅ NM dispatcher nastaven – auto-mount při každém připojení WiFi/VPN"
+    echo "   ✅ NetworkManager dispatcher configured – auto-mount on every WiFi/VPN connection"
 else
-    echo "   ℹ️  NetworkManager dispatcher přeskočen (adresář $NM_DISPATCHER_DIR neexistuje)"
+    echo "   ℹ️  NetworkManager dispatcher skipped (directory $NM_DISPATCHER_DIR does not exist)"
 fi
 
-# ── Restart Plasma shellu ─────────────────────────────────────────────────────
+# ── Restart Plasma shell ──────────────────────────────────────────────────────
 echo ""
 echo "🔄 Restarting Plasma shell..."
 kquitapp6 plasmashell 2>/dev/null || true
@@ -231,5 +231,5 @@ echo "RC daemon status:    systemctl --user status rclone-rc"
 echo "Auto-mount config:   ~/.config/rclone-plasmoid/automount.conf"
 echo "Auto-mount log:      journalctl --user -u rclone-automount"
 echo ""
-echo "💡 Tip: V plasmoidu klikni na ikonu sítě u remotu pro zapnutí auto-mountu"
+echo "💡 Tip: In the plasmoid, click the network icon next to a remote to enable auto-mount"
 echo ""

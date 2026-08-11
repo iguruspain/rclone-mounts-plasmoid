@@ -1,4 +1,4 @@
-// HistoryPage.qml – záložka s historií naposledy přenesených souborů
+// HistoryPage.qml – tab with history of recently transferred files
 
 import QtQuick
 import QtQuick.Layouts
@@ -10,7 +10,7 @@ ColumnLayout {
     id: page
     spacing: 0
 
-    // Hlavička: titulek + tlačítko vymazat
+    // Header: title + clear button
     RowLayout {
         Layout.fillWidth: true
         Layout.margins: Kirigami.Units.smallSpacing
@@ -41,14 +41,14 @@ ColumnLayout {
         }
     }
 
-    // Oddělovač
+    // Divider
     Rectangle {
         Layout.fillWidth: true
         height: 1
         color: "#20808080"
     }
 
-    // Seznam přenesených souborů
+    // Transferred files list
     PlasmaComponents.ScrollView {
         Layout.fillWidth: true
         Layout.fillHeight: true
@@ -73,7 +73,7 @@ ColumnLayout {
                 property bool   hasError: entry.error && entry.error !== ""
                 property string fileName: {
                     var n = entry.name || ""
-                    // Zobrazit jen poslední část cesty
+                    // Show only the last part of the path
                     var slash = n.lastIndexOf("/")
                     return slash >= 0 ? n.substring(slash + 1) : n
                 }
@@ -86,7 +86,7 @@ ColumnLayout {
                 contentItem: RowLayout {
                     spacing: Kirigami.Units.largeSpacing
 
-                    // Stavová ikona (OK / chyba)
+                    // Status icon (OK / error)
                     Kirigami.Icon {
                         source: hDel.hasError ? "dialog-error-symbolic"
                                               : "checkmark-symbolic"
@@ -97,7 +97,7 @@ ColumnLayout {
                         Layout.alignment: Qt.AlignVCenter
                     }
 
-                    // Název souboru + cesta
+                    // File name + path
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 1
@@ -142,7 +142,7 @@ ColumnLayout {
                 }
             }
 
-            // Prázdný stav
+            // Empty state
             Kirigami.PlaceholderMessage {
                 anchors.centerIn: parent
                 width: parent.width - (Kirigami.Units.largeSpacing * 4)
@@ -156,7 +156,7 @@ ColumnLayout {
         }
     }
 
-    // Stavový řádek dole
+    // Status bar at bottom
     PlasmaExtras.PlasmoidHeading {
         Layout.fillWidth: true
         contentItem: RowLayout {

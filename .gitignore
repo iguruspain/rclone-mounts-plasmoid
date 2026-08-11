@@ -1,0 +1,67 @@
+# KDE Plasma Applet / Qt Project
+*.o
+*.a
+*.so
+*.la
+*.lo
+*.moc.cpp
+*.moc.h
+*.ui
+*.ts
+*.qm
+
+# CMake build files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+install_manifest.txt
+*.cmake
+CMakeLists.txt.user
+
+# Qt Creator
+*.pro.user
+*.pro.user.*
+*.creator
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build directories
+build/
+out/
+dist/
+debug/
+release/
+
+# Generated files
+*.pyc
+__pycache__/
+*.egg-info/
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# KDE specific
+kde-*.desktop
+*.kdev4
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# AGENTS.md
+AGENTS.md

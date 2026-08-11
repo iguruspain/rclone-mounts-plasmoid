@@ -7,8 +7,8 @@ import org.kde.kirigami as Kirigami
 KCM.SimpleKCM {
     id: page
 
-    // cfg_ aliasy – hodnoty pochází výhradně z plasmoid.configuration (main.xml defaults)
-    // ŽÁDNÉ hardcoded value/checked na controls – přesně jako Dockio
+    // cfg_ aliases – values come exclusively from plasmoid.configuration (main.xml defaults)
+    // NO hardcoded value/checked on controls – exactly like Dockio
     property alias cfg_rcPort:       rcPortSpin.value
     property alias cfg_mountBase:    mountBaseField.text
     property alias cfg_pollInterval: pollSpin.value
