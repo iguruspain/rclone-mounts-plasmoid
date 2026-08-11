@@ -1,0 +1,187 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-11 19:28+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../contents/config/config.qml:5
+msgid "General"
+msgstr ""
+
+#: ../contents/ui/config/ConfigGeneral.qml:35
+msgid "Autostart:"
+msgstr ""
+
+#: ../contents/ui/config/ConfigGeneral.qml:36
+msgid "Start daemon automatically if not running"
+msgstr ""
+
+#: ../contents/ui/config/ConfigGeneral.qml:41
+msgid "Mount Points"
+msgstr ""
+
+#: ../contents/ui/config/ConfigGeneral.qml:46
+msgid "Base folder:"
+msgstr ""
+
+#: ../contents/ui/config/ConfigGeneral.qml:47
+msgid "$HOME/mnt/rclone"
+msgstr ""
+
+#: ../contents/ui/config/ConfigGeneral.qml:54
+msgid "Each remote will be mounted as a subfolder (e.g. ~/mnt/rclone/gdrive)"
+msgstr ""
+
+#: ../contents/ui/config/ConfigGeneral.qml:60
+msgid "Behavior"
+msgstr ""
+
+#: ../contents/ui/config/ConfigGeneral.qml:65
+msgid "Poll interval (s):"
+msgstr ""
+
+#: ../contents/ui/config/ConfigGeneral.qml:73
+msgid "Fetch on start:"
+msgstr ""
+
+#: ../contents/ui/config/ConfigGeneral.qml:74
+msgid "Fetch mount states on startup"
+msgstr ""
+
+#: ../contents/ui/HistoryPage.qml:21
+msgid "%1 transferred files"
+msgstr ""
+
+#: ../contents/ui/HistoryPage.qml:33
+msgid "Clear history"
+msgstr ""
+
+#: ../contents/ui/HistoryPage.qml:40 ../contents/ui/MainPage.qml:63
+#: ../contents/ui/MainPage.qml:371
+msgid "Refresh"
+msgstr ""
+
+#: ../contents/ui/HistoryPage.qml:151 ../contents/ui/MainPage.qml:527
+msgid "No transfer history"
+msgstr ""
+
+#: ../contents/ui/HistoryPage.qml:153 ../contents/ui/MainPage.qml:529
+msgid "History will appear after the first transfer completes"
+msgstr ""
+
+#: ../contents/ui/HistoryPage.qml:154 ../contents/ui/MainPage.qml:530
+msgid "Start the RC daemon to monitor transfers"
+msgstr ""
+
+#: ../contents/ui/HistoryPage.qml:165
+msgid "Daemon running on :%1"
+msgstr ""
+
+#: ../contents/ui/HistoryPage.qml:165 ../contents/ui/MainPage.qml:541
+msgid "Daemon not running"
+msgstr ""
+
+#: ../contents/ui/MainPage.qml:25
+msgid "Mounts"
+msgstr ""
+
+#: ../contents/ui/MainPage.qml:29
+msgid "History"
+msgstr ""
+
+#: ../contents/ui/MainPage.qml:55
+msgid "Search remote..."
+msgstr ""
+
+#: ../contents/ui/MainPage.qml:121
+msgid "Not mounted"
+msgstr ""
+
+#: ../contents/ui/MainPage.qml:140
+msgid "Auto-mount enabled – click to disable"
+msgstr ""
+
+#: ../contents/ui/MainPage.qml:141
+msgid "Enable auto-mount on network connection"
+msgstr ""
+
+#: ../contents/ui/MainPage.qml:154
+msgid "Open folder"
+msgstr ""
+
+#: ../contents/ui/MainPage.qml:154
+msgid "Mount first"
+msgstr ""
+
+#: ../contents/ui/MainPage.qml:159
+msgid "Unmount"
+msgstr ""
+
+#: ../contents/ui/MainPage.qml:159
+msgid "Mount"
+msgstr ""
+
+#: ../contents/ui/MainPage.qml:183
+msgid "No remotes match"
+msgstr ""
+
+#: ../contents/ui/MainPage.qml:183
+msgid "No rclone remotes"
+msgstr ""
+
+#: ../contents/ui/MainPage.qml:184
+msgid "Configure them: rclone config"
+msgstr ""
+
+#: ../contents/ui/MainPage.qml:195 ../contents/ui/main.qml:25
+msgid "%1 / %2 mounted"
+msgstr ""
+
+#: ../contents/ui/MainPage.qml:235
+msgid "Transfer in progress"
+msgstr ""
+
+#: ../contents/ui/MainPage.qml:360
+msgid "%1 completed transfers"
+msgstr ""
+
+#: ../contents/ui/MainPage.qml:361
+msgid "No transfers yet"
+msgstr ""
+
+#: ../contents/ui/MainPage.qml:384
+msgid "Retry failed transfers"
+msgstr ""
+
+#: ../contents/ui/MainPage.qml:541
+msgid "Daemon running · :%1"
+msgstr ""
+
+#: ../contents/ui/main.qml:23
+msgid "Rclone Mounts"
+msgstr ""
+
+#: ../contents/ui/main.qml:26
+msgid "RC daemon is not running"
+msgstr ""
+
+#: ../contents/ui/main.qml:30
+msgid "Stop RC Daemon"
+msgstr ""
+
+#: ../contents/ui/main.qml:30
+msgid "Start RC Daemon"
+msgstr ""

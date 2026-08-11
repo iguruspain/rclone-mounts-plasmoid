@@ -22,11 +22,11 @@ ColumnLayout {
 
         PlasmaComponents.TabButton {
             icon.name: "folder-cloud"
-            text: "Mounts"
+            text: i18n("Mounts")
         }
         PlasmaComponents.TabButton {
             icon.name: "view-history"
-            text: "History"
+            text: i18n("History")
         }
     }
 
@@ -52,7 +52,7 @@ ColumnLayout {
                     id: searchField
                     Layout.fillWidth: true
                     Layout.margins: Kirigami.Units.smallSpacing
-                    placeholderText: "Search remote..."
+                    placeholderText: i18n("Search remote...")
                     onTextChanged: filterText = text.toLowerCase()
                 }
 
@@ -60,7 +60,7 @@ ColumnLayout {
                     icon.name: "view-refresh"
                     onClicked: { fetchRemotes(); checkDaemon() }
                     display: QQC2.AbstractButton.IconOnly
-                    PlasmaComponents.ToolTip { text: "Refresh" }
+                    PlasmaComponents.ToolTip { text: i18n("Refresh") }
                 }
             }
 
@@ -118,7 +118,7 @@ ColumnLayout {
                                     Layout.fillWidth: true
                                 }
                                 PlasmaComponents.Label {
-                                    text: del.mounted ? del.mountPath : "Not mounted"
+                                    text: del.mounted ? del.mountPath : i18n("Not mounted")
                                     font.pixelSize: Kirigami.Units.gridUnit * 0.6
                                     elide: Text.ElideRight
                                     opacity: 0.7
@@ -137,8 +137,8 @@ ColumnLayout {
                                 onClicked: toggleAutoMount(del.remote)
                                 PlasmaComponents.ToolTip {
                                     text: autoMountList.indexOf(del.remote) >= 0
-                                          ? "Auto-mount enabled – click to disable"
-                                          : "Enable auto-mount on network connection"
+                                          ? i18n("Auto-mount enabled – click to disable")
+                                          : i18n("Enable auto-mount on network connection")
                                 }
                             }
 
@@ -151,12 +151,12 @@ ColumnLayout {
                                 Layout.alignment: Qt.AlignVCenter
                                 onClicked: openFolder(del.mountPath)
                                 PlasmaComponents.ToolTip {
-                                    text: del.mounted ? "Open folder" : "Mount first"
+                                    text: del.mounted ? i18n("Open folder") : i18n("Mount first")
                                 }
                             }
 
                             PlasmaComponents.Button {
-                                text: del.mounted ? "Unmount" : "Mount"
+                                text: del.mounted ? i18n("Unmount") : i18n("Mount")
                                 icon.name: del.mounted ? "media-eject" : "media-playback-start"
                                 highlighted: del.mounted
                                 enabled: rcRunning
@@ -180,8 +180,8 @@ ColumnLayout {
                         width: parent.width - (Kirigami.Units.largeSpacing * 4)
                         visible: remoteList.count === 0 && !loading
                         icon.name: filterText !== "" ? "edit-find" : "folder-cloud"
-                        text: filterText !== "" ? "No remotes match" : "No rclone remotes"
-                        explanation: filterText !== "" ? "" : "Configure them: rclone config"
+                        text: filterText !== "" ? i18n("No remotes match") : i18n("No rclone remotes")
+                        explanation: filterText !== "" ? "" : i18n("Configure them: rclone config")
                     }
                 }
             }
@@ -192,7 +192,7 @@ ColumnLayout {
                 contentItem: RowLayout {
                     spacing: Kirigami.Units.smallSpacing
                     PlasmaComponents.Label {
-                        text: Object.keys(activeMounts).length + " / " + remotes.length + " mounted"
+                        text: i18n("%1 / %2 mounted", Object.keys(activeMounts).length, remotes.length)
                         font.pixelSize: 11
                         opacity: 0.7
                         Layout.fillWidth: true
@@ -232,7 +232,7 @@ ColumnLayout {
                     spacing: Kirigami.Units.smallSpacing
 
                     PlasmaComponents.Label {
-                        text: "Transfer in progress"
+                        text: i18n("Transfer in progress")
                         font.pixelSize: 11
                         font.bold: true
                         opacity: 0.8
@@ -357,8 +357,8 @@ ColumnLayout {
 
                 PlasmaComponents.Label {
                     text: transferHistory.length > 0
-                          ? transferHistory.length + " completed transfers"
-                          : "No transfers yet"
+                          ? i18n("%1 completed transfers", transferHistory.length)
+                          : i18n("No transfers yet")
                     font.pixelSize: 11
                     opacity: 0.55
                     Layout.fillWidth: true
@@ -368,7 +368,7 @@ ColumnLayout {
                     icon.name: "view-refresh"
                     display: QQC2.AbstractButton.IconOnly
                     onClicked: { checkTransfers(); checkStats() }
-                    PlasmaComponents.ToolTip { text: "Refresh" }
+                    PlasmaComponents.ToolTip { text: i18n("Refresh") }
                 }
 
                 PlasmaComponents.ToolButton {
@@ -381,7 +381,7 @@ ColumnLayout {
                         return false
                     }
                     onClicked: retryFailed()
-                    PlasmaComponents.ToolTip { text: "Retry failed transfers" }
+                    PlasmaComponents.ToolTip { text: i18n("Retry failed transfers") }
                 }
             }
 
@@ -524,10 +524,10 @@ ColumnLayout {
                         width: parent.width - (Kirigami.Units.largeSpacing * 4)
                         visible: histList.count === 0 && activeTransfers.length === 0
                         icon.name: "view-history"
-                        text: "No transfer history"
+                        text: i18n("No transfer history")
                         explanation: rcRunning
-                                     ? "History will appear after the first transfer completes"
-                                     : "Start the RC daemon to monitor transfers"
+                                     ? i18n("History will appear after the first transfer completes")
+                                     : i18n("Start the RC daemon to monitor transfers")
                     }
                 }
             }
@@ -538,7 +538,7 @@ ColumnLayout {
                 contentItem: RowLayout {
                     spacing: Kirigami.Units.smallSpacing
                     PlasmaComponents.Label {
-                        text: rcRunning ? "Daemon running · :" + rcPort : "Daemon not running"
+                        text: rcRunning ? i18n("Daemon running · :%1", rcPort) : i18n("Daemon not running")
                         font.pixelSize: 11
                         opacity: 0.7
                         Layout.fillWidth: true

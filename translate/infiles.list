@@ -1,0 +1,5 @@
+../contents/config/config.qml
+../contents/ui/config/ConfigGeneral.qml
+../contents/ui/HistoryPage.qml
+../contents/ui/MainPage.qml
+../contents/ui/main.qml

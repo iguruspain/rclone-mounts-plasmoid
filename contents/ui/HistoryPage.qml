@@ -18,7 +18,7 @@ ColumnLayout {
 
         PlasmaComponents.Label {
             text: transferHistory.length > 0
-                  ? transferHistory.length + " transferred files"
+                  ? i18n("%1 transferred files", transferHistory.length)
                   : ""
             font.pixelSize: 11
             opacity: 0.6
@@ -30,14 +30,14 @@ ColumnLayout {
             visible: transferHistory.length > 0
             display: PlasmaComponents.ToolButton.IconOnly
             onClicked: transferHistory = []
-            PlasmaComponents.ToolTip { text: "Clear history" }
+            PlasmaComponents.ToolTip { text: i18n("Clear history") }
         }
 
         PlasmaComponents.ToolButton {
             icon.name: "view-refresh"
             display: PlasmaComponents.ToolButton.IconOnly
             onClicked: checkTransfers()
-            PlasmaComponents.ToolTip { text: "Refresh" }
+            PlasmaComponents.ToolTip { text: i18n("Refresh") }
         }
     }
 
@@ -148,10 +148,10 @@ ColumnLayout {
                 width: parent.width - (Kirigami.Units.largeSpacing * 4)
                 visible: histList.count === 0
                 icon.name: "view-history"
-                text: "No transfer history"
+                text: i18n("No transfer history")
                 explanation: rcRunning
-                             ? "History will appear after the first transfer completes"
-                             : "Start the RC daemon to monitor transfers"
+                             ? i18n("History will appear after the first transfer completes")
+                             : i18n("Start the RC daemon to monitor transfers")
             }
         }
     }
@@ -162,7 +162,7 @@ ColumnLayout {
         contentItem: RowLayout {
             spacing: Kirigami.Units.smallSpacing
             PlasmaComponents.Label {
-                text: rcRunning ? "Daemon running on :" + rcPort : "Daemon not running"
+                text: rcRunning ? i18n("Daemon running on :%1", rcPort) : i18n("Daemon not running")
                 font.pixelSize: 11
                 opacity: 0.7
                 Layout.fillWidth: true

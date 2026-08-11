@@ -32,37 +32,37 @@ KCM.SimpleKCM {
 
         QQC2.CheckBox {
             id: autoStartCheck
-            Kirigami.FormData.label: "Autostart:"
-            text: "Start daemon automatically if not running"
+            Kirigami.FormData.label: i18n("Autostart:")
+            text: i18n("Start daemon automatically if not running")
         }
 
         Kirigami.Separator {
             Kirigami.FormData.isSection: true
-            Kirigami.FormData.label: "Mount Points"
+            Kirigami.FormData.label: i18n("Mount Points")
         }
 
         QQC2.TextField {
             id: mountBaseField
-            Kirigami.FormData.label: "Base folder:"
-            placeholderText: "$HOME/mnt/rclone"
+            Kirigami.FormData.label: i18n("Base folder:")
+            placeholderText: i18n("$HOME/mnt/rclone")
             Layout.minimumWidth: 280
         }
 
         Kirigami.InlineMessage {
             Kirigami.FormData.label: " "
             Layout.fillWidth: true
-            text: "Each remote will be mounted as a subfolder (e.g. ~/mnt/rclone/gdrive)"
+            text: i18n("Each remote will be mounted as a subfolder (e.g. ~/mnt/rclone/gdrive)")
             visible: true
         }
 
         Kirigami.Separator {
             Kirigami.FormData.isSection: true
-            Kirigami.FormData.label: "Behavior"
+            Kirigami.FormData.label: i18n("Behavior")
         }
 
         QQC2.SpinBox {
             id: pollSpin
-            Kirigami.FormData.label: "Poll interval (s):"
+            Kirigami.FormData.label: i18n("Poll interval (s):")
             from: 5
             to: 300
             stepSize: 5
@@ -70,8 +70,8 @@ KCM.SimpleKCM {
 
         QQC2.CheckBox {
             id: fetchOnStartCheck
-            Kirigami.FormData.label: "Fetch on start:"
-            text: "Fetch mount states on startup"
+            Kirigami.FormData.label: i18n("Fetch on start:")
+            text: i18n("Fetch mount states on startup")
         }
     }
 }

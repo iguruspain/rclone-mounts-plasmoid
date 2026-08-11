@@ -10,6 +10,7 @@
         "BugReportUrl": "",
         "Category": "System Information",
         "Description": "Manage Rclone mount points from the KDE Plasma panel.",
+        "Description[es]": "Gestiona puntos de montaje de Rclone desde el panel de KDE Plasma.",
         "EnabledByDefault": true,
         "FormFactors": [
             "desktop",
@@ -19,6 +20,7 @@
         "Id": "org.kde.plasma.rclone-mounts",
         "License": "MIT",
         "Name": "Rclone Mounts",
+        "Name[es]": "Rclone Mounts",
         "Version": "1.0.0",
         "Website": ""
     },

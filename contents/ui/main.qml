@@ -20,14 +20,14 @@ PlasmoidItem {
                      ? PlasmaCore.Types.ActiveStatus
                      : PlasmaCore.Types.PassiveStatus
 
-    toolTipMainText: "Rclone Mounts"
+    toolTipMainText: i18n("Rclone Mounts")
     toolTipSubText: rcRunning
-                    ? (Object.keys(activeMounts).length + " / " + remotes.length + " mounted")
-                    : "RC daemon is not running"
+                    ? i18n("%1 / %2 mounted", Object.keys(activeMounts).length, remotes.length)
+                    : i18n("RC daemon is not running")
 
     Plasmoid.contextualActions: [
         PlasmaCore.Action {
-            text: rcRunning ? "Stop RC Daemon" : "Start RC Daemon"
+            text: rcRunning ? i18n("Stop RC Daemon") : i18n("Start RC Daemon")
             icon.name: rcRunning ? "media-playback-stop" : "media-playback-start"
             onTriggered: {
                 if (rcRunning) {
