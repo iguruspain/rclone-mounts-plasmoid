@@ -89,6 +89,7 @@ ColumnLayout {
                         width: remoteList.width
                         height: Kirigami.Units.gridUnit * 3.5
                         hoverEnabled: true
+                        onHoveredChanged: if (hovered) remoteList.currentIndex = index
 
                         property string remote:     modelData
                         property string remoteName: remote.replace(/:$/, "")
@@ -118,10 +119,11 @@ ColumnLayout {
                                 }
                                 PlasmaComponents.Label {
                                     text: del.mounted ? del.mountPath : "Not mounted"
-                                    font.pixelSize: Kirigami.Units.gridUnit * 0.75
+                                    font.pixelSize: Kirigami.Units.gridUnit * 0.6
                                     elide: Text.ElideRight
                                     opacity: 0.7
                                     Layout.fillWidth: true
+                                    color: del.mounted ? Kirigami.Theme.positiveTextColor : Kirigami.Theme.textColor
                                 }
                             }
 
@@ -300,7 +302,7 @@ ColumnLayout {
                             Layout.fillWidth: true
                             height: 3
                             radius: 1
-                            color: "#20808080"
+                            color: Qt.rgba(Kirigami.Theme.highlightColor.r, Kirigami.Theme.highlightColor.g, Kirigami.Theme.highlightColor.b, 0.50)
                             clip: true
 
                             // Determinate fill
@@ -513,7 +515,7 @@ ColumnLayout {
                             anchors.bottom: parent.bottom
                             width: parent.width
                             height: 1
-                            color: "#20808080"
+                            color: Qt.rgba(Kirigami.Theme.highlightColor.r, Kirigami.Theme.highlightColor.g, Kirigami.Theme.highlightColor.b, 0.50)
                         }
                     }
 

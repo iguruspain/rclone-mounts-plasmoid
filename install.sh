@@ -45,9 +45,9 @@ else
 fi
 
 # ── Mount directory ────────────────────────────────────────────────────────
-MOUNT_BASE="$REAL_HOME/mnt/rclone"
-mkdir -p "$MOUNT_BASE"
-echo "   📁 Mount directory: $MOUNT_BASE"
+#MOUNT_BASE="$REAL_HOME/mnt/rclone"
+#mkdir -p "$MOUNT_BASE"
+#echo "   📁 Mount directory: $MOUNT_BASE"
 
 # ── Systemd user service for RC daemon ──────────────────────────────────────
 echo ""
@@ -107,7 +107,7 @@ else
     echo "   📄 Config exists: $AM_CONF"
 fi
 
-# Mount skript
+# Mount script
 cat > "$AM_SCRIPT" << 'SCRIPT'
 #!/usr/bin/env bash
 # rclone-automount.sh – mounts remotes from the list once RC daemon is available
