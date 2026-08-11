@@ -31,10 +31,12 @@ PlasmoidItem {
             icon.name: rcRunning ? "media-playback-stop" : "media-playback-start"
             onTriggered: {
                 if (rcRunning) {
-                    exe.run("pkill -f 'rclone rcd.*" + rcPort + "' 2>&1 || true")
+                    stopDaemon()
+                    userStoppedRcd = true
                     rcRunning = false
                     activeMounts = {}
                 } else {
+                    userStoppedRcd = false
                     startDaemon()
                 }
             }
@@ -64,6 +66,7 @@ PlasmoidItem {
     property var    activeMounts:    ({})
     property bool   rcRunning:       false
     property bool   loading:         true
+    property bool   userStoppedRcd:  false
     property string errorMsg:        ""
     property string filterText:      ""
     property var    remoteTypes:     ({})
@@ -389,7 +392,8 @@ PlasmoidItem {
     }
     function checkTransfers() { if (rcRunning) exe.run("rclone rc core/transferred --rc-addr=" + rcAddr + " 2>&1") }
     function checkStats()     { if (rcRunning) exe.run("rclone rc core/stats --rc-addr=" + rcAddr + " 2>&1") }
-    function startDaemon()    { errorMsg = "Starting..."; exe.run("rclone rcd --rc-addr=" + rcAddr + " --rc-no-auth &") }
+    function startDaemon()    { errorMsg = "Starting..."; exe.run("systemctl --user start rclone-rc.service") }
+    function stopDaemon()     { exe.run("systemctl --user stop rclone-rc.service") }
     function openFolder(path) { exe.run("xdg-open '" + path + "'") }
 
     // Extracts readable part of error – removes JSON block "Details: [...]" from rclone/Google API
@@ -463,7 +467,7 @@ PlasmoidItem {
         if (plasmoid.configuration.fetchOnStart) checkDaemon()
     }
     onRcRunningChanged: {
-        if (!rcRunning && autoStartRcd) startDaemon()
+        if (!rcRunning && autoStartRcd && !userStoppedRcd) startDaemon()
     }
 
     // ════════════════════════════════════════════════════════════════════════

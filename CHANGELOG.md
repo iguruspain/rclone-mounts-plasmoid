@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.1] - 2026-08-11
+### Fixed
+- Prevent RC daemon auto-restart after manual stop. Added `userStoppedRcd` flag to avoid `onRcRunningChanged` re-launching daemon when user pressed Stop
+- Systemd service `rclone-rc.service` now uses `Restart=no` to allow manual control
+- Plasmoid controls daemon via `systemctl --user start/stop rclone-rc.service` instead of `pkill`/`rclone rcd &`
+
 ## [1.1.0] - 2026-08-11
 ### Added
 - Internationalization support for KDE Plasma

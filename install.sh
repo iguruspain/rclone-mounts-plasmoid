@@ -64,8 +64,7 @@ After=network.target
 [Service]
 Type=simple
 ExecStart=/usr/bin/rclone rcd --rc-addr=localhost:5572 --rc-no-auth
-Restart=on-failure
-RestartSec=5
+Restart=no
 
 [Install]
 WantedBy=default.target
